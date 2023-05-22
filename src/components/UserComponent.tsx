@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Link, useParams } from "react-router-dom";
-import UserForm from "./UserForm";
-import UserAddForm from "./UserAddForm";
+import { Modal, Button } from "react-bootstrap";
+import UserUpdateFormPopup from "./UserUpdateFormPopup";
+import UserAddFormPopup from "./UserAddFormPopup";
+import "./FormPopup.css";
 
 interface User {
   id: number;
@@ -14,12 +15,11 @@ interface User {
   role: string;
 }
 
-// const { id } = useParams();
-
 function UserComponent() {
   const [users, setUsers] = useState<User[]>([]);
   const [editingUser, setEditingUser] = useState<User | null>(null);
-  const [showAddForm, setShowAddForm] = useState(false);
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -35,12 +35,17 @@ function UserComponent() {
   };
 
   const deleteUser = async (id: number) => {
-    await axios.delete(`http://localhost:8080/users/${id}`);
-    fetchData();
+    try {
+      await axios.delete(`http://localhost:8080/users/${id}`);
+      fetchData();
+    } catch (error) {
+      console.log("Error deleting user: ", error);
+    }
   };
 
   const updateUser = (user: User) => {
     setEditingUser(user);
+    setIsUpdateModalOpen(true);
   };
 
   const handleSubmit = async (updatedUser: User) => {
@@ -50,6 +55,7 @@ function UserComponent() {
         updatedUser
       );
       setEditingUser(null); // Close the form
+      setIsUpdateModalOpen(false); // Close the update modal
       fetchData(); // Refresh the user data after update
     } catch (error) {
       console.log("Error updating user: ", error);
@@ -59,7 +65,7 @@ function UserComponent() {
   const handleAddSubmit = async (newUser: User) => {
     try {
       await axios.post("http://localhost:8080/users", newUser);
-      setShowAddForm(false); // Close the form
+      setIsAddModalOpen(false); // Close the add modal
       fetchData(); // Refresh the user data after adding a new user
     } catch (error) {
       console.log("Error adding user: ", error);
@@ -68,7 +74,13 @@ function UserComponent() {
 
   const handleCancel = () => {
     setEditingUser(null); // Close the form
-    setShowAddForm(false); // Close the add form
+    setIsAddModalOpen(false); // Close the add form
+  };
+
+  const handleCloseModal = () => {
+    setEditingUser(null);
+    setIsUpdateModalOpen(false);
+    setIsAddModalOpen(false);
   };
 
   return (
@@ -76,12 +88,13 @@ function UserComponent() {
       <div className="image-overlay"></div>
       <div className="data-component-content">
         <div className="container" style={{ textAlign: "center" }}>
-          <button
-            className="btn btn-primary mx-2"
-            onClick={() => setShowAddForm(true)}
+          <Button
+            variant="primary"
+            className="mx-2"
+            onClick={() => setIsAddModalOpen(true)}
           >
             Add User
-          </button>
+          </Button>
           <div className="py-4">
             <table className="table border shadow">
               <thead>
@@ -119,47 +132,73 @@ function UserComponent() {
                     <td className="table-cell">{user.phoneNumber}</td>
                     <td className="table-cell">{user.role}</td>
                     <td style={{ textAlign: "center" }}>
-                      <button
-                        className="btn btn-outline-primary mx-2"
+                      <Button
+                        variant="outline-primary"
+                        className="mx-2"
                         onClick={() => updateUser(user)}
                       >
                         Update
-                      </button>
-                      <button
-                        className="btn btn-danger mx-2"
+                      </Button>
+                      <Button
+                        variant="danger"
+                        className="mx-2"
                         onClick={() => deleteUser(user.id)}
                       >
                         Delete
-                      </button>
+                      </Button>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
             {editingUser && (
-              <UserForm
-                user={editingUser}
-                onSubmit={handleSubmit}
-                onCancel={handleCancel}
-              />
+              <Modal
+                show={isUpdateModalOpen}
+                onHide={handleCloseModal}
+                centered
+              >
+                <Modal.Header
+                  closeButton
+                  style={{ background: "#333", color: "white" }}
+                >
+                  <Modal.Title>Update User</Modal.Title>
+                </Modal.Header>
+                <Modal.Body style={{ background: "#333" }}>
+                  <UserUpdateFormPopup
+                    user={editingUser}
+                    onSubmit={handleSubmit}
+                    onCancel={handleCloseModal}
+                  />
+                </Modal.Body>
+              </Modal>
             )}
           </div>
         </div>
-        {showAddForm && (
-          <UserAddForm
-            user={{
-              id: 0,
-              lastName: "",
-              firstName: "",
-              email: "",
-              password: "",
-              phoneNumber: "",
-              image: "",
-              role: "",
-            }}
-            onSubmit={handleAddSubmit}
-            onCancel={handleCancel}
-          />
+        {isAddModalOpen && (
+          <Modal show={isAddModalOpen} onHide={handleCloseModal} centered>
+            <Modal.Header
+              closeButton
+              style={{ background: "#333", color: "white" }}
+            >
+              <Modal.Title>Add User</Modal.Title>
+            </Modal.Header>
+            <Modal.Body style={{ background: "#333" }}>
+              <UserAddFormPopup
+                user={{
+                  id: 0,
+                  lastName: "",
+                  firstName: "",
+                  email: "",
+                  password: "",
+                  phoneNumber: "",
+                  image: "",
+                  role: "",
+                }}
+                onSubmit={handleAddSubmit}
+                onCancel={handleCloseModal}
+              />
+            </Modal.Body>
+          </Modal>
         )}
       </div>
     </div>

@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
-import ElectricityDataForm from "./ElectricityDataForm";
+import ElectricityDataUpdateFormPopup from "./ElectricityDataUpdateFormPopup";
+import ElectricityDataAddFormPopup from "./ElectricityDataAddFormPopup";
+import "./FormPopup.css";
+import { Modal, Button } from "react-bootstrap";
 import { format, parse, toDate } from "date-fns";
 
 interface ElectricityData {
@@ -22,7 +25,8 @@ interface ElectricityData {
 function ElectricityDataComponent() {
   const [data, setData] = useState<ElectricityData[]>([]);
   const [editingData, setEditingData] = useState<ElectricityData | null>(null);
-  const [showAddForm, setShowAddForm] = useState(false);
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -39,13 +43,14 @@ function ElectricityDataComponent() {
     }
   };
 
-  const deleteUser = async (id: number) => {
+  const deleteData = async (id: number) => {
     await axios.delete(`http://localhost:8080/electricity-data/${id}`);
     fetchData();
   };
 
   const updateData = (data: ElectricityData) => {
     setEditingData(data);
+    setIsUpdateModalOpen(true);
   };
 
   const handleAddSubmit = async (newElectricityData: ElectricityData) => {
@@ -71,7 +76,8 @@ function ElectricityDataComponent() {
       };
 
       await axios.post("http://localhost:8080/electricity-data", updatedData);
-      setShowAddForm(false);
+      setEditingData(null);
+      setIsUpdateModalOpen(false);
       fetchData();
     } catch (error) {
       console.log("Error adding indexes: ", error);
@@ -108,7 +114,13 @@ function ElectricityDataComponent() {
 
   const handleCancel = () => {
     setEditingData(null);
-    setShowAddForm(false);
+    setIsAddModalOpen(false);
+  };
+
+  const handleCloseModal = () => {
+    setEditingData(null);
+    setIsUpdateModalOpen(false);
+    setIsAddModalOpen(false);
   };
 
   return (
@@ -118,7 +130,7 @@ function ElectricityDataComponent() {
         <div className="container" style={{ textAlign: "center" }}>
           <button
             className="btn btn-primary mx-2"
-            onClick={() => setShowAddForm(true)}
+            onClick={() => setIsAddModalOpen(true)}
           >
             Add index
           </button>
@@ -175,18 +187,20 @@ function ElectricityDataComponent() {
                     <td className="table-cell">{item.ratePerUnit}</td>
                     <td className="table-cell">{item.billAmount}</td>
                     <td style={{ textAlign: "center" }}>
-                      <button
-                        className="btn btn-outline-primary mx-2"
+                      <Button
+                        variant="outline-primary"
+                        className="mx-2"
                         onClick={() => updateData(item)}
                       >
                         Update
-                      </button>
-                      <button
-                        className="btn btn-danger mx-2"
-                        onClick={() => deleteUser(item.id)}
+                      </Button>
+                      <Button
+                        variant="danger"
+                        className="mx-2"
+                        onClick={() => deleteData(item.id)}
                       >
                         Delete
-                      </button>
+                      </Button>
                     </td>
                   </tr>
                 ))}
@@ -194,30 +208,50 @@ function ElectricityDataComponent() {
             </table>
           </div>
         </div>
-        {showAddForm && (
-          <ElectricityDataForm
-            data={{
-              id: 0,
-              user: { id: 1 },
-              meterId: "",
-              startDate: format(new Date(), "yyyy-MM-dd"),
-              endDate: format(new Date(), "yyyy-MM-dd"),
-              startReading: 0,
-              endReading: 0,
-              unitsUsed: 0,
-              ratePerUnit: 0,
-              billAmount: 0,
-            }}
-            onSubmit={handleAddSubmit}
-            onCancel={handleCancel}
-          />
+        {isAddModalOpen && (
+          <Modal show={isAddModalOpen} onHide={handleCloseModal} centered>
+            <Modal.Header
+              closeButton
+              style={{ background: "#333", color: "white" }}
+            >
+              <Modal.Title>Add Index</Modal.Title>
+            </Modal.Header>
+            <Modal.Body style={{ background: "#333" }}>
+              <ElectricityDataAddFormPopup
+                data={{
+                  id: 0,
+                  user: { id: 1 },
+                  meterId: "",
+                  startDate: format(new Date(), "yyyy-MM-dd"),
+                  endDate: format(new Date(), "yyyy-MM-dd"),
+                  startReading: 0,
+                  endReading: 0,
+                  unitsUsed: 0,
+                  ratePerUnit: 0,
+                  billAmount: 0,
+                }}
+                onSubmit={handleAddSubmit}
+                onCancel={handleCloseModal}
+              />
+            </Modal.Body>
+          </Modal>
         )}
         {editingData && (
-          <ElectricityDataForm
-            data={editingData}
-            onSubmit={handleUpdateSubmit}
-            onCancel={handleCancel}
-          />
+          <Modal show={isUpdateModalOpen} onHide={handleCloseModal} centered>
+            <Modal.Header
+              closeButton
+              style={{ background: "#333", color: "white" }}
+            >
+              <Modal.Title>Update Index</Modal.Title>
+            </Modal.Header>
+            <Modal.Body style={{ background: "#333" }}>
+              <ElectricityDataUpdateFormPopup
+                data={editingData}
+                onSubmit={handleUpdateSubmit}
+                onCancel={handleCancel}
+              />
+            </Modal.Body>
+          </Modal>
         )}
       </div>
     </div>

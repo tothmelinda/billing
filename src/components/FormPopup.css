@@ -1,0 +1,80 @@
+.update-form-popup,
+.add-form-popup {
+  background-color: #333;
+  padding: 20px;
+  border-radius: 4px;
+  color: white;
+}
+
+.update-form-popup-content,
+.add-form-popup-content {
+  margin-top: 20px;
+}
+
+.update-form-popup form,
+.add-form-popup form {
+  color: white;
+}
+
+.update-form-popup label,
+.add-form-popup label {
+  color: white;
+}
+
+.update-form-popup input,
+.add-form-popup input {
+  background-color: #222;
+  color: white;
+  border: 1px solid #666;
+  border-radius: 4px;
+  padding: 8px;
+  margin-bottom: 10px;
+}
+
+.update-form-popup-buttons,
+.add-form-popup-buttons {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.update-form-popup-buttons button,
+.add-form-popup-buttons button {
+  margin-left: 10px;
+}
+
+.update-form-popup-buttons button.btn-primary,
+.add-form-popup-buttons button.btn-primary {
+  background-color: #007bff;
+  border-color: #007bff;
+}
+
+.update-form-popup-buttons button.btn-primary:hover,
+.add-form-popup-buttons button.btn-primary:hover {
+  background-color: #0069d9;
+  border-color: #0062cc;
+}
+
+.update-form-popup-buttons button.btn-danger,
+.add-form-popup-buttons button.btn-danger {
+  background-color: #dc3545;
+  border-color: #dc3545;
+}
+
+.update-form-popup-buttons button.btn-danger:hover,
+.add-form-popup-buttons button.btn-danger:hover {
+  background-color: #c82333;
+  border-color: #bd2130;
+}
+
+.update-form-popup-buttons button.btn-dark,
+.add-form-popup-buttons button.btn-dark {
+  background-color: #343a40;
+  border-color: #343a40;
+}
+
+.update-form-popup-buttons button.btn-dark:hover,
+.add-form-popup-buttons button.btn-dark:hover {
+  background-color: #23272b;
+  border-color: #1d2124;
+}

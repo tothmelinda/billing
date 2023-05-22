@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
-import InvoiceForm from "./InvoiceForm";
 import { format, parse, toDate } from "date-fns";
+import { Modal, Button } from "react-bootstrap";
+import InvoiceUpdateFormPopup from "./InvoiceUpdateFormPopup";
+import InvoiceAddFormPopup from "./InvoiceAddFormPopup";
+import "./FormPopup.css";
 
 interface Invoice {
   id: number;
@@ -21,7 +24,8 @@ interface Invoice {
 function InvoiceComponent() {
   const [invoice, setInvoice] = useState<Invoice[]>([]);
   const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
-  const [showAddForm, setShowAddForm] = useState(false);
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -45,6 +49,7 @@ function InvoiceComponent() {
 
   const updateInvoice = (invoice: Invoice) => {
     setEditingInvoice(invoice);
+    setIsUpdateModalOpen(true);
   };
 
   const handleAddSubmit = async (newInvoice: Invoice) => {
@@ -64,9 +69,9 @@ function InvoiceComponent() {
         dueDate: formattedDueDate,
         paidDate: formattedPaidDate,
       };
-
       await axios.post("http://localhost:8080/invoices", updatedInvoice);
-      setShowAddForm(false);
+      setEditingInvoice(null);
+      setIsUpdateModalOpen(false);
       fetchData();
     } catch (error) {
       console.log("Error adding indexes: ", error);
@@ -91,7 +96,7 @@ function InvoiceComponent() {
 
       await axios.put(
         `http://localhost:8080/invoices/${updatedInvoice.id}`,
-        updatedInvoiceData // Use updatedInvoiceData instead of updatedInvoice
+        updatedInvoiceData
       );
       setEditingInvoice(null);
       fetchData();
@@ -102,7 +107,13 @@ function InvoiceComponent() {
 
   const handleCancel = () => {
     setEditingInvoice(null);
-    setShowAddForm(false);
+    setIsAddModalOpen(false);
+  };
+
+  const handleCloseModal = () => {
+    setEditingInvoice(null);
+    setIsUpdateModalOpen(false);
+    setIsAddModalOpen(false);
   };
 
   return (
@@ -112,7 +123,7 @@ function InvoiceComponent() {
         <div className="container" style={{ textAlign: "center" }}>
           <button
             className="btn btn-primary mx-2"
-            onClick={() => setShowAddForm(true)}
+            onClick={() => setIsAddModalOpen(true)}
           >
             Add invoice
           </button>
@@ -162,21 +173,25 @@ function InvoiceComponent() {
                     <td className="table-cell">{item.dateIssued}</td>
                     <td className="table-cell">{item.dueDate}</td>
                     <td className="table-cell">{item.paidDate}</td>
-                    <td className="table-cell">{item.paidDate}</td>
-                    <td className="table-cell">{item.isPaid}</td>
+                    <td className="table-cell">
+                      {item.isPaid ? "Paid" : "Not paid"}
+                    </td>
+                    <td className="table-cell">{item.paymentMethod}</td>
                     <td style={{ textAlign: "center" }}>
-                      <button
-                        className="btn btn-outline-primary mx-2"
+                      <Button
+                        variant="outline-primary"
+                        className="mx-2"
                         onClick={() => updateInvoice(item)}
                       >
                         Update
-                      </button>
-                      <button
-                        className="btn btn-danger mx-2"
+                      </Button>
+                      <Button
+                        variant="danger"
+                        className="mx-2"
                         onClick={() => deleteInvoice(item.id)}
                       >
                         Delete
-                      </button>
+                      </Button>
                     </td>
                   </tr>
                 ))}
@@ -184,29 +199,49 @@ function InvoiceComponent() {
             </table>
           </div>
         </div>
-        {showAddForm && (
-          <InvoiceForm
-            invoice={{
-              id: 0,
-              user: { id: 1 },
-              description: "",
-              totalAmount: 0,
-              dateIssued: format(new Date(), "yyyy-MM-dd"),
-              dueDate: format(new Date(), "yyyy-MM-dd"),
-              paidDate: format(new Date(), "yyyy-MM-dd"),
-              isPaid: true,
-              paymentMethod: "",
-            }}
-            onSubmit={handleAddSubmit}
-            onCancel={handleCancel}
-          />
+        {isAddModalOpen && (
+          <Modal show={isAddModalOpen} onHide={handleCloseModal} centered>
+            <Modal.Header
+              closeButton
+              style={{ background: "#333", color: "white" }}
+            >
+              <Modal.Title>Add Invoice</Modal.Title>
+            </Modal.Header>
+            <Modal.Body style={{ background: "#333" }}>
+              <InvoiceAddFormPopup
+                invoice={{
+                  id: 0,
+                  user: { id: 1 },
+                  description: "",
+                  totalAmount: 0,
+                  dateIssued: format(new Date(), "yyyy-MM-dd"),
+                  dueDate: format(new Date(), "yyyy-MM-dd"),
+                  paidDate: format(new Date(), "yyyy-MM-dd"),
+                  isPaid: true,
+                  paymentMethod: "",
+                }}
+                onSubmit={handleAddSubmit}
+                onCancel={handleCloseModal}
+              />
+            </Modal.Body>
+          </Modal>
         )}
         {editingInvoice && (
-          <InvoiceForm
-            invoice={editingInvoice}
-            onSubmit={handleUpdateSubmit}
-            onCancel={handleCancel}
-          />
+          <Modal show={isUpdateModalOpen} onHide={handleCloseModal} centered>
+            <Modal.Header
+              closeButton
+              style={{ background: "#333", color: "white" }}
+            >
+              <Modal.Title>Update Invoice</Modal.Title>
+            </Modal.Header>
+            <Modal.Body style={{ background: "#333" }}>
+              <InvoiceUpdateFormPopup
+                invoice={editingInvoice}
+                onSubmit={handleUpdateSubmit}
+                onCancel={handleCloseModal}
+              />
+            </Modal.Body>
+          </Modal>
         )}
       </div>
     </div>

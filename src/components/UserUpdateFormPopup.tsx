@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "./UserForm.css";
+import { Modal, Button, Form } from "react-bootstrap";
 
 interface User {
   id: number;
@@ -11,13 +11,17 @@ interface User {
   role: string;
 }
 
-interface UserFormProps {
+interface UserUpdateFormPopupProps {
   user: User;
   onSubmit: (updatedUser: User) => void;
   onCancel: () => void;
 }
 
-const UserForm: React.FC<UserFormProps> = ({ user, onSubmit, onCancel }) => {
+const UserUpdateFormPopup: React.FC<UserUpdateFormPopupProps> = ({
+  user,
+  onSubmit,
+  onCancel,
+}) => {
   const [firstName, setFirstName] = useState(user.firstName);
   const [lastName, setLastName] = useState(user.lastName);
   const [email, setEmail] = useState(user.email);
@@ -38,45 +42,49 @@ const UserForm: React.FC<UserFormProps> = ({ user, onSubmit, onCancel }) => {
   };
 
   return (
-    <form onSubmit={handleFormSubmit}>
-      <label>
-        First Name:
-        <input
+    <Form onSubmit={handleFormSubmit}>
+      <Form.Group controlId="firstName">
+        <Form.Label>First Name:</Form.Label>
+        <Form.Control
           type="text"
           value={firstName}
           onChange={(e) => setFirstName(e.target.value)}
         />
-      </label>
-      <label>
-        Last Name:
-        <input
+      </Form.Group>
+      <Form.Group controlId="lastName">
+        <Form.Label>Last Name:</Form.Label>
+        <Form.Control
           type="text"
           value={lastName}
           onChange={(e) => setLastName(e.target.value)}
         />
-      </label>
-      <label>
-        Email:
-        <input
+      </Form.Group>
+      <Form.Group controlId="email">
+        <Form.Label>Email:</Form.Label>
+        <Form.Control
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
-      </label>
-      <label>
-        Phone Number:
-        <input
+      </Form.Group>
+      <Form.Group controlId="phoneNumber">
+        <Form.Label>Phone Number:</Form.Label>
+        <Form.Control
           type="tel"
           value={phoneNumber}
           onChange={(e) => setPhoneNumber(e.target.value)}
         />
-      </label>
-      <button type="submit">Save</button>
-      <button type="button" onClick={onCancel}>
-        Cancel
-      </button>
-    </form>
+      </Form.Group>
+      <div className="update-form-popup-buttons">
+        <Button variant="primary" type="submit">
+          Save
+        </Button>
+        <Button variant="secondary" onClick={onCancel}>
+          Cancel
+        </Button>
+      </div>
+    </Form>
   );
 };
 
-export default UserForm;
+export default UserUpdateFormPopup;

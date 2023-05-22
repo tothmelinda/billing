@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 
 //TODO : refactor this for the periods in which the indexes are transmitted for invoicing
+//this is only an exercise to create Alerts
 
 interface Props {
   children: ReactNode;

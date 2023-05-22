@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import axios from "axios";
-import "./UserForm.css";
+import { Modal, Button, Form } from "react-bootstrap";
 
 interface User {
   id: number;
@@ -13,13 +12,13 @@ interface User {
   role: string;
 }
 
-interface UserAddFormProps {
+interface UserAddFormPopupProps {
   user: User;
-  onSubmit: (newUser: User) => Promise<void>; // Update the onSubmit function type
+  onSubmit: (newUser: User) => Promise<void>;
   onCancel: () => void;
 }
 
-const UserAddForm: React.FC<UserAddFormProps> = ({
+const UserAddFormPopup: React.FC<UserAddFormPopupProps> = ({
   user,
   onSubmit,
   onCancel,
@@ -32,7 +31,7 @@ const UserAddForm: React.FC<UserAddFormProps> = ({
   const [image, setImage] = useState(user.image);
   const [role, setRole] = useState(user.role);
 
-  const handleFormSubmit = (e: React.FormEvent) => {
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const newUser: User = {
@@ -46,73 +45,77 @@ const UserAddForm: React.FC<UserAddFormProps> = ({
       role,
     };
 
-    onSubmit(newUser);
+    await onSubmit(newUser);
   };
 
   return (
-    <form onSubmit={handleFormSubmit} style={{ color: "white" }}>
-      <label>
-        First Name:
-        <input
+    <Form onSubmit={handleFormSubmit}>
+      <Form.Group controlId="firstName">
+        <Form.Label>First Name:</Form.Label>
+        <Form.Control
           type="text"
           value={firstName}
           onChange={(e) => setFirstName(e.target.value)}
         />
-      </label>
-      <label>
-        Last Name:
-        <input
+      </Form.Group>
+      <Form.Group controlId="lastName">
+        <Form.Label>Last Name:</Form.Label>
+        <Form.Control
           type="text"
           value={lastName}
           onChange={(e) => setLastName(e.target.value)}
         />
-      </label>
-      <label>
-        Email:
-        <input
+      </Form.Group>
+      <Form.Group controlId="email">
+        <Form.Label>Email:</Form.Label>
+        <Form.Control
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
-      </label>
-      <label>
-        Password:
-        <input
+      </Form.Group>
+      <Form.Group controlId="password">
+        <Form.Label>Password:</Form.Label>
+        <Form.Control
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
-      </label>
-      <label>
-        Phone Number:
-        <input
+      </Form.Group>
+      <Form.Group controlId="phoneNumber">
+        <Form.Label>Phone Number:</Form.Label>
+        <Form.Control
           type="tel"
           value={phoneNumber}
           onChange={(e) => setPhoneNumber(e.target.value)}
         />
-      </label>
-      <label>
-        Image:
-        <input
+      </Form.Group>
+      <Form.Group controlId="image">
+        <Form.Label>Image:</Form.Label>
+        <Form.Control
           type="text"
           value={image}
           onChange={(e) => setImage(e.target.value)}
         />
-      </label>
-      <label>
-        Role:
-        <input
-          type="role"
+      </Form.Group>
+      <Form.Group controlId="role">
+        <Form.Label>Role:</Form.Label>
+        <Form.Control
+          type="text"
           value={role}
           onChange={(e) => setRole(e.target.value)}
         />
-      </label>
-      <button type="submit">Save</button>
-      <button type="button" onClick={onCancel}>
-        Cancel
-      </button>
-    </form>
+      </Form.Group>
+      <div className="add-form-popup-buttons">
+        <Button variant="primary" type="submit">
+          Add
+        </Button>
+        <Button variant="secondary" onClick={onCancel}>
+          Cancel
+        </Button>
+      </div>
+    </Form>
   );
 };
 
-export default UserAddForm;
+export default UserAddFormPopup;
